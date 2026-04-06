@@ -1,0 +1,13 @@
+.roster-table th, .roster-table td {
+    vertical-align: middle;
+    font-size: 0.85rem;
+    padding: 0.3rem !important;
+}
+
+.text-purple {
+    color: #6f42c1;
+}
+
+.roster-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
