@@ -1,0 +1,54 @@
+.text-navy {
+    color: #1e3050 !important;
+}
+
+.text-orange {
+    color: #f47b2c !important;
+}
+
+.bg-orange {
+    background-color: #f47b2c !important;
+}
+
+.bg-orange-soft {
+    background-color: #fcece3 !important;
+}
+
+.bg-blue-soft {
+    background-color: #e6ebf5 !important;
+}
+
+.tracking-wider {
+    letter-spacing: 0.1em;
+}
+
+.custom-table tr:last-child {
+    border-bottom: none !important;
+}
+
+.w-40 {
+    width: 40%;
+}
+
+.roster-item:hover {
+    background-color: #f8f9fc;
+    border-color: #dee2e6 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+}
+
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+}
+
+.fs-7 {
+    font-size: 0.75rem;
+}

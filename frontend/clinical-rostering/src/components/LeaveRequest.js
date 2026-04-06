@@ -16,22 +16,22 @@ function LeaveRequest() {
     });
 
     useEffect(() => {
-
-        // console.log(userData);
-
-        if (sessionStorage.getItem('user')) {
-            const user = JSON.parse(sessionStorage.getItem('user'));
-            setUserData(user);
+        const userStr = sessionStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                if (user) setUserData(user);
+            } catch (err) {
+                console.error("Error parsing user data:", err);
+            }
         }
-
     }, [])
-
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         const data = {
-            e_id: userData['e_id'],
-            date: selectedDate.toDateString(),
+            e_id: userData?.e_id || "",
+            date: selectedDate ? selectedDate.toDateString() : "",
             reason: reason
         }
 
@@ -77,71 +77,82 @@ function LeaveRequest() {
     }
 
     return (
-
-        <>
-            <div className='container container-fluid my-5'>
-                <h1 className='display-5 fw-bold'>Leave Requests</h1>
-                <p>You have 3 leaves left for this month</p>
-
-                <hr />
-
-                <div className='my-5'> 
-
-                    {/* <p>You c</p> */}
-
-                    <div className='row'>
-
-                        <div className="col-md-4 mb-5">
-                            <p className='fw-bold'>Select Date:</p>
-
-                            <Calendar
-                                onChange={setSelectedDate}
-                                value={selectedDate}
-                                tileClassName={tileClassName}
-                                onClickDay={handleTileClick}
-                            />
-                        </div>
-
-
-                        <div className="col-md-8" style={{ "paddingLeft": "5%", "paddingRight": "5%" }}>
-
-                            <div className='row'>
-                                <div className="col-md-6">
-                                    <p className='fw-bold mb-1'>Name:</p>
-                                    <p className='text-muted'>{userData.e_name}</p>
-                                </div>
-
-                                <div className="col-md-6">
-                                    <p className='fw-bold mb-1'>Emp Id:</p>
-                                    <p className='text-muted m-0'>{userData.e_id}</p>
-                                </div>
-
-                            </div>
-
-                            <p className='fw-bold mb-2 mt-3'>Selected date:</p>
-                            <p className='border p-2 rounded-5'
-                                style={{ "backgroundColor": "#6dfc9f", "display": "inline" }}>
-                                {selectedDate.toDateString()}</p>
-
-                            <p className='fw-bold mb-0 mt-5 mb-2'>Reason for Leave:</p>
-                            <div className="form">
-                                <textarea className="form-control" id="textAreaExample" rows="4" placeholder='Write reason here' style={{ "resize": "none" }} onChange={onReasonChange} text={reason}></textarea>
-                                <button className='btn btn-primary my-3' onClick={handleFormSubmit}>Submit</button>
-
-                            </div>
-
-                        </div>
+        <div className="bg-light pb-5" style={{ minHeight: "calc(100vh - 70px)" }}>
+            <div className="container pt-5">
+                
+                <div className="row mb-4">
+                    <div className="col-12">
+                        <p className="text-warning fw-bold small mb-1 tracking-wider">EMPLOYEE PORTAL</p>
+                        <h1 className="fw-bolder text-navy mb-3 display-5" style={{ color: "#1e3050", fontWeight: "800" }}>Leave Requests</h1>
+                        <p className="text-secondary fs-5" style={{ maxWidth: "700px" }}>
+                            Manage your time off. You currently have <span className="fw-bold text-orange">3 leaves</span> remaining for this month.
+                        </p>
                     </div>
-
                 </div>
 
-                <div>
+                <div className="card shadow-sm border-0 rounded-4 mt-4">
+                    <div className="card-body p-4 p-md-5">
+                        <div className="row">
+                            <div className="col-md-5 mb-5 mb-md-0 d-flex flex-column align-items-center align-items-md-start">
+                                <h5 className='fw-bold text-navy mb-4'><i className="far fa-calendar-alt text-orange me-2"></i> Select Date</h5>
+                                <div className="border p-2 rounded-4 shadow-sm bg-white">
+                                    <Calendar
+                                        onChange={setSelectedDate}
+                                        value={selectedDate}
+                                        tileClassName={tileClassName}
+                                        onClickDay={handleTileClick}
+                                        className="border-0"
+                                    />
+                                </div>
+                            </div>
 
+                            <div className="col-md-7 px-md-5">
+                                <div className="bg-blue-soft p-4 rounded-4 mb-4">
+                                    <div className='row'>
+                                        <div className="col-md-6 mb-3 mb-md-0">
+                                            <p className="small text-secondary fw-bold mb-1 tracking-wider">NAME</p>
+                                            <h5 className="text-navy fw-bold mb-0">{userData?.e_name || "Guest Employee"}</h5>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <p className="small text-secondary fw-bold mb-1 tracking-wider">EMPLOYEE ID</p>
+                                            <h5 className="text-navy fw-bold mb-0">{userData?.e_id || "Unregistered"}</h5>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-4">
+                                    <p className="small text-secondary fw-bold mb-2 tracking-wider">SELECTED DATE</p>
+                                    <div className="d-inline-block px-4 py-2 rounded-pill bg-orange-soft text-orange fw-bold">
+                                        <i className="far fa-calendar-check me-2"></i>
+                                        {selectedDate.toDateString()}
+                                    </div>
+                                </div>
+
+                                <div className="mb-4">
+                                    <p className="small text-secondary fw-bold mb-2 tracking-wider">REASON FOR LEAVE</p>
+                                    <textarea 
+                                        className="form-control bg-light border-0 px-3 py-3" 
+                                        rows="4" 
+                                        placeholder='Please provide a brief reason for your absence...' 
+                                        style={{ resize: "none", borderRadius: '12px' }} 
+                                        onChange={onReasonChange} 
+                                        value={reason}>
+                                    </textarea>
+                                </div>
+
+                                <button 
+                                    className="btn text-white fw-bold py-3 px-5 rounded-pill shadow-sm transition-all hover-translate-y w-100 w-md-auto" 
+                                    onClick={handleFormSubmit}
+                                    style={{ backgroundColor: '#f47b2c' }}>
+                                    Submit Request <i className="fas fa-paper-plane ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
-
-        </>
+        </div>
     );
 
 }
