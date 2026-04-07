@@ -9,8 +9,7 @@ export default function Sidebar({ isOpen = true, toggleSidebar }) {
 
     const handleLoggedOut = () => {
         sessionStorage.removeItem('user');
-        alert("User has been logged out.");
-        window.location.reload();
+        navigate('/logged-out');
     };
 
     if (!userLoggedIn) {

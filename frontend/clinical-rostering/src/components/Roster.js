@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 export default function Roster({ type }) {
-    const [selectedDate, setSelectedDate] = useState('2026-01-01'); // YYYY-MM-DD
+    const [selectedDate] = useState('2026-01-01'); // YYYY-MM-DD
     const [showNewEntry, setShowNewEntry] = useState(false);
     const fileInputRef = useRef(null);
     
@@ -20,19 +20,35 @@ export default function Roster({ type }) {
 
     const monthName = dateObj.toLocaleString('default', { month: 'long' });
 
-    // Mock data for nurses and doctors
-    const [nursesData, setNursesData] = useState([
-        { sl: "01", name: "ARCHANA", initials: "AR", schedule: ["M", "M", "E", "W/O", "N", "M", "G", "M", "M", "M", "M", "M", "M", "M", "M"] },
-        { sl: "02", name: "NEELAVATHI", initials: "NE", schedule: ["E", "N", "W/O", "G", "M", "CL", "CL", "E", "E", "E", "E", "E", "E", "E", "E"] },
-        { sl: "03", name: "SIREESHA", initials: "SI", schedule: ["G", "G", "G", "E", "E", "W/O", "M", "G", "G", "G", "G", "G", "G", "G", "G"] },
-        { sl: "04", name: "POOJA", initials: "PO", schedule: ["N", "W/O", "M", "M", "G", "E", "N", "N", "N", "N", "N", "N", "N", "N", "N"] },
-        { sl: "05", name: "DEEKSHITA", initials: "DE", schedule: ["EL", "EL", "EL", "EL", "W/O", "M", "M", "M", "M", "M", "M", "M", "M", "M", "M"] },
-    ]);
+    const [user, setUser] = useState(null);
 
-    const [doctorsData, setDoctorsData] = useState([
-        { sl: "01", name: "Dr. John Smith", initials: "JS", schedule: ["G", "G", "G", "G", "G", "W/O", "W/O", "G", "G", "G", "G", "G", "W/O", "W/O", "G"] },
-        { sl: "02", name: "Dr. Sarah Lee", initials: "SL", schedule: ["M", "M", "E", "E", "N", "N", "W/O", "M", "M", "E", "E", "N", "N", "W/O", "M"] },
-    ]);
+    React.useEffect(() => {
+        const userStr = sessionStorage.getItem('user');
+        if (userStr) {
+            try {
+                setUser(JSON.parse(userStr));
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }, []);
+
+    const [nursesData, setNursesData] = useState([]);
+    const [doctorsData, setDoctorsData] = useState([]);
+
+    React.useEffect(() => {
+        // Base mock data mapping for demo purposes. 
+        // We filter this to only show the CURRENT user logged in.
+        let me = { sl: "01", name: user?.e_name || "Unknown", initials: (user?.e_name || "UN").substring(0,2).toUpperCase(), schedule: ["M", "M", "E", "W/O", "N", "M", "G", "M", "M", "M", "M", "M", "M", "M", "M"] };
+        
+        if (user) {
+            if (type === 'Nurses' && (user.e_type === 'Nurse' || user.e_type === 'Staff')) {
+                setNursesData([me]);
+            } else if (type === 'Doctors' && user.e_type === 'Doctor') {
+                setDoctorsData([me]);
+            }
+        }
+    }, [user, type]);
 
     const data = type === 'Nurses' ? nursesData : doctorsData;
 
@@ -70,8 +86,6 @@ export default function Roster({ type }) {
             case "N": classes += " bg-n text-white"; break;
             case "G": classes += " bg-g text-secondary"; break;
             case "W/O": classes += " bg-wo text-white"; style.fontSize = "0.7rem"; break;
-            case "EL": classes += " bg-e text-orange"; style.fontSize = "0.75rem"; break;
-            case "CL": classes += " bg-n text-white"; style.fontSize = "0.75rem"; break;
             default: classes += " bg-light text-secondary"; break;
         }
 
@@ -133,18 +147,16 @@ export default function Roster({ type }) {
                         { title: "EVENING", s: "E", t: "14:00 - 20:00", border: "#fcece3" },
                         { title: "NIGHT", s: "N", t: "20:00 - 08:00", border: "#1e3050" },
                         { title: "GENERAL", s: "G", t: "09:00 - 17:00", border: "#f8f9fa" },
-                        { title: "WEEK OFF", s: "W/O", icon: "far fa-calendar-times text-danger", border: "#ffcccc" },
-                        { title: "EARNED LEAVE", s: "EL", icon: "fas fa-plane text-warning", border: "#ffebcc" },
-                        { title: "CASUAL LEAVE", s: "CL", icon: "fas fa-bed text-primary", border: "#cce5ff" }
+                        { title: "WEEK OFF", s: "W/O", icon: "far fa-calendar-times text-danger", border: "#ffcccc" }
                     ].map((idx, i) => (
                         <div className="col" key={i} style={{ minWidth: '140px' }}>
                             <div className="card border-0 rounded-4 shadow-sm h-100 overflow-hidden">
                                 <div className="d-flex h-100">
-                                    <div style={{ width: "6px", backgroundColor: idx.s === "M" ? "#1e3050" : idx.s === "E" ? "#f47b2c" : idx.s === "N" ? "#1e3050" : idx.s === "W/O" ? "#dc3545" : idx.s === "EL" ? "#e67e22" : idx.s === "CL" ? "#3498db" : "#adb5bd" }}></div>
+                                    <div style={{ width: "6px", backgroundColor: idx.s === "M" ? "#1e3050" : idx.s === "E" ? "#f47b2c" : idx.s === "N" ? "#1e3050" : idx.s === "W/O" ? "#dc3545" : "#adb5bd" }}></div>
                                     <div className="p-3 w-100 d-flex flex-column justify-content-center bg-white">
                                         <span className="text-secondary small fw-bold" style={{ fontSize: "0.65rem", letterSpacing: "0.5px" }}>{idx.title}</span>
                                         <div className="d-flex align-items-center justify-content-between mt-1">
-                                            <span className="fw-bolder fs-4" style={{ color: idx.s === "W/O" ? "#dc3545" : idx.s === "EL" ? "#e67e22" : idx.s === "CL" ? "#3498db" : "#1e3050" }}>{idx.s}</span>
+                                            <span className="fw-bolder fs-4" style={{ color: idx.s === "W/O" ? "#dc3545" : "#1e3050" }}>{idx.s}</span>
                                             {idx.t ? (
                                                 <span className="text-muted" style={{ fontSize: "0.75rem", backgroundColor: idx.border, padding: "2px 6px", borderRadius: "4px", fontWeight: "600", whiteSpace: 'nowrap' }}>{idx.t}</span>
                                             ) : (

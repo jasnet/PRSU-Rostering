@@ -43,17 +43,7 @@ async def root():
 def login(emp: dict):
 
     if cursor is None:
-        mock_users = {
-            'Emp_01': {'e_id': 'Emp_01', 'e_name': 'Dr. John Smith', 'e_type': 'Doctor', 'primary_specialization': 'Cardiology', 'secondary_specialization': 'Internal Medicine', 'location': 'Cardiology', 'password': 'password123'},
-            'Emp_02': {'e_id': 'Emp_02', 'e_name': 'Sarah Lee', 'e_type': 'Nurse', 'primary_specialization': 'Pediatrics', 'secondary_specialization': 'Neonatal Care', 'location': 'Pediatrics', 'password': 'password456'},
-            'Emp_03': {'e_id': 'Emp_03', 'e_name': 'James Kim', 'e_type': 'Radiology Technician', 'primary_specialization': 'MRI Scanning', 'secondary_specialization': 'CT Scanning', 'location': 'Radiology', 'password': 'password789'},
-            'Emp_04': {'e_id': 'Emp_04', 'e_name': 'Lisa Chen', 'e_type': 'Pharmacist', 'primary_specialization': 'Oncology', 'secondary_specialization': 'Geriatrics', 'location': 'Oncology', 'password': 'passwordabc'},
-            'Emp_05': {'e_id': 'Emp_05', 'e_name': 'Michael Davis', 'e_type': 'Admin Assistant', 'primary_specialization': 'Medical Billing and Coding', 'secondary_specialization': 'Medical Transcription', 'location': 'Medical Records', 'password': 'passworddef'}
-        }
-        user = []
-        if emp.get('e_id') in mock_users and mock_users[emp['e_id']]['password'] == emp.get('password'):
-            user.append(mock_users[emp['e_id']])
-        return {"Employee" : user}
+        raise HTTPException(status_code=503, detail="Database not available")
 
     sql = 'select * from employees where e_id = %s and password = %s';
 
@@ -71,9 +61,42 @@ def login(emp: dict):
             result[col_names[i]] = row[i]
         user.append(result)
 
-    # Print the results dictionary
-
     return {"Employee" : user}
+
+
+@app.post('/register-user')
+def register(emp: dict):
+
+    if cursor is None:
+        raise HTTPException(status_code=503, detail="Database not available")
+
+    # Check if employee ID already exists
+    check_sql = 'select e_id from employees where e_id = %s'
+    cursor.execute(check_sql, (emp['e_id'],))
+    existing = cursor.fetchone()
+
+    if existing:
+        raise HTTPException(status_code=400, detail="Employee ID already exists")
+
+    # Insert new employee
+    insert_sql = '''INSERT INTO employees (e_id, e_name, e_type, primary_specialization, secondary_specialization, location, password)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)'''
+
+    try:
+        cursor.execute(insert_sql, (
+            emp['e_id'],
+            emp['e_name'],
+            emp.get('e_type', 'Staff'),
+            emp.get('primary_specialization', ''),
+            emp.get('secondary_specialization', ''),
+            emp.get('location', ''),
+            emp['password']
+        ))
+        connection.commit()
+        return {"message": "Employee registered successfully", "e_id": emp['e_id']}
+    except Exception as e:
+        connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post('/send-leave')
