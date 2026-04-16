@@ -145,3 +145,4 @@ def get_date(date):
     date = date.split(" ")
     d = "{}-{}-{}".format((date[3]), month2idx[date[1]], int(date[2]))
     return d
+# Trigger reload
