@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from config.db import db
 from routes import doctor_routes
+from nurse_roster.api import nurse_routes
 import datetime
 
 app = FastAPI()
@@ -16,7 +17,7 @@ app.add_middleware(
 )
 
 app.include_router(doctor_routes.router)
-
+app.include_router(nurse_routes.router)
 month2idx = {"Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", "July": "07", "Aug": "08", "Sept": "09", "Oct": "10", "Nov": "11", "Dec": "12"}
 
 def index2id(n):

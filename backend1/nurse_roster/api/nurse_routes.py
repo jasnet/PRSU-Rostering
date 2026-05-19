@@ -1,0 +1,134 @@
+from fastapi import APIRouter
+from config.db import db
+
+from nurse_roster.services.staffing_service import (
+    get_staffing_status
+)
+
+from nurse_roster.scheduler.monthly_scheduler import (
+    generate_monthly_roster
+)
+
+router = APIRouter(
+    prefix="/api/nurse-roster",
+    tags=["Nurse Roster"]
+)
+
+# -----------------------------------
+# TEST
+# -----------------------------------
+@router.get("/test")
+async def test():
+
+    return {
+        "message": "Nurse roster working"
+    }
+
+# -----------------------------------
+# CREATE NURSE
+# -----------------------------------
+@router.post("/nurses")
+def create_nurse(data: dict):
+
+    existing = db.nurses.find_one({
+        "nurse_id": data["nurse_id"]
+    })
+
+    if existing:
+
+        return {
+            "message": "Nurse already exists"
+        }
+
+    db.nurses.insert_one(data)
+
+    return {
+        "message": "Nurse created successfully"
+    }
+
+# -----------------------------------
+# GET ALL NURSES
+# -----------------------------------
+@router.get("/nurses")
+def get_nurses():
+
+    nurses = list(
+        db.nurses.find({}, {"_id": 0})
+    )
+
+    return nurses
+
+# -----------------------------------
+# GENERATE MONTHLY ROSTER
+# -----------------------------------
+@router.post("/generate-roster")
+def generate_roster(data: dict):
+
+    department = data["department"]
+
+    total_days = data["days"]
+
+    nurses = list(
+
+        db.nurses.find(
+            {"department": department},
+            {"_id": 0}
+        )
+
+    )
+
+    if not nurses:
+
+        return {
+            "message": "No nurses found"
+        }
+
+    roster = generate_monthly_roster(
+        nurses,
+        total_days
+    )
+
+    if roster:
+
+        db.nurse_rosters.insert_many(roster)
+
+    return {
+
+        "message": "Roster generated",
+
+        "entries": len(roster)
+
+    }
+
+# -----------------------------------
+# GET ROSTER
+# -----------------------------------
+@router.get("/roster/{department}")
+def get_roster(department: str):
+
+    roster = list(
+
+        db.nurse_rosters.find(
+            {"department": department},
+            {"_id": 0}
+        )
+
+    )
+
+    return roster
+
+# -----------------------------------
+# STAFFING STATUS
+# -----------------------------------
+@router.get("/staffing")
+def staffing(
+    patients: int,
+    nurses: int,
+    severity: str
+):
+
+    return get_staffing_status(
+        patients,
+        nurses,
+        severity
+    )
