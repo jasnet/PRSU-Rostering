@@ -1,249 +1,137 @@
-# services/doctor_roster_service.py
-
 import random
 
-# ==========================================
-# Psychiatry Specialty Clinics
-# ==========================================
+DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
 PSYCHIATRY_CLINICS = {
     "Monday": "Psychomotor and Neuropsychiatry Clinic",
     "Tuesday": "De-addiction Clinic",
     "Wednesday": "Child Psychiatry Clinic",
     "Thursday": "Family Counselling and Marital Therapy",
     "Friday": "Geriatric Mental Health Clinic",
-    "Saturday": "General OPD"
+    "Saturday": "Outpatient Department"
 }
 
-# ==========================================
-# Teaching Classes
-# ==========================================
-TEACHING_CLASSES = [
-    "UG Teaching Class",
-    "PG Seminar",
-    "Case Discussion",
-    "Journal Club",
-    "Clinical Demonstration"
+CLASS_TIMES = [
+    "10:00 AM - 11:00 AM",
+    "11:00 AM - 12:00 PM",
+    "02:00 PM - 03:00 PM",
+    "03:00 PM - 04:00 PM",
+    "02:00 PM - 04:00 PM"
 ]
 
-# ==========================================
-# OT Surgery Types
-# ==========================================
-SURGERIES = [
-    "Elective Surgery",
-    "Major Procedure",
-    "Emergency Surgery",
-    "Scheduled OT"
-]
 
-# ==========================================
-# Utility Function
-# ==========================================
-def create_slot(day, activity, details, start_time, end_time):
+def create_slot(day, activity, details):
+    start_time = "09:00 AM"
+    end_time = "04:30 PM"
+
+    if details == "OT":
+        start_time = "08:00 AM"
+        end_time = "02:00 PM"
+
+    elif details == "Other":
+        start_time = "10:00 AM"
+        end_time = "01:00 PM"
+
     return {
         "day": day,
         "activity": activity,
-        "details": details,      # OPD / OT / Other / On Duty
+        "details": details,
         "startTime": start_time,
-        "endTime": end_time
+        "endTime": end_time,
+        "classSchedule": None,
+        "onDuty": False
     }
 
-# ==========================================
-# Add Teaching Class to 1 or 2 OPD Days
-# ==========================================
-def add_teaching_classes(schedule, max_classes=2):
-    opd_indices = [
-        i for i, slot in enumerate(schedule)
-        if slot["details"] == "OPD"
-    ]
 
-    if not opd_indices:
-        return schedule
+def add_classes(schedule):
+    opd_slots = [slot for slot in schedule if slot["details"] == "OPD"]
 
-    num_classes = random.randint(1, min(max_classes, len(opd_indices)))
-    selected = random.sample(opd_indices, num_classes)
+    if not opd_slots:
+        return
 
-    for idx in selected:
-        class_name = random.choice(TEACHING_CLASSES)
-        schedule[idx]["activity"] += f" + {class_name} (2:00 PM - 4:00 PM)"
+    num_classes = random.randint(1, 2)
+    selected = random.sample(opd_slots, min(num_classes, len(opd_slots)))
+
+    for slot in selected:
+        slot["classSchedule"] = random.choice(CLASS_TIMES)
+
+
+def assign_on_duty(schedule):
+    selected = random.choice(schedule)
+    selected["onDuty"] = True
+
+
+def generate_major_roster():
+    # Friday fixed as Other
+    working_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Saturday"]
+
+    # Randomly select 2 OT days
+    ot_days = random.sample(working_days, 2)
+
+    schedule = []
+
+    for day in DAYS:
+        if day == "Friday":
+            schedule.append(
+                create_slot(day, "Personal Agenda / Research", "Other")
+            )
+        elif day in ot_days:
+            schedule.append(
+                create_slot(day, "Scheduled Surgery", "OT")
+            )
+        else:
+            schedule.append(
+                create_slot(day, "Outpatient Department", "OPD")
+            )
+
+    add_classes(schedule)
+    assign_on_duty(schedule)
 
     return schedule
 
-# ==========================================
-# Major Department Roster
-# 3 OPD + 2 OT + 1 Other (Friday)
-# ==========================================
-def generate_major_roster():
-    schedule = [
-        create_slot(
-            "Monday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        ),
-        create_slot(
-            "Tuesday",
-            random.choice(SURGERIES),
-            "OT",
-            "08:00 AM",
-            "02:00 PM"
-        ),
-        create_slot(
-            "Wednesday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        ),
-        create_slot(
-            "Thursday",
-            random.choice(SURGERIES),
-            "OT",
-            "08:00 AM",
-            "02:00 PM"
-        ),
-        create_slot(
-            "Friday",
-            "Personal Agenda / Research / Meetings",
-            "Other",
-            "10:00 AM",
-            "01:00 PM"
-        ),
-        create_slot(
-            "Saturday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        )
-    ]
 
-    return add_teaching_classes(schedule, 2)
-
-# ==========================================
-# Psychiatry Roster
-# Specialty Clinics are OPD
-# 1 or 2 teaching classes
-# ==========================================
 def generate_psychiatry_roster():
     schedule = []
 
-    for day in [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday"
-    ]:
-        clinic = PSYCHIATRY_CLINICS.get(day, "General OPD")
-
+    for day in DAYS:
+        activity = PSYCHIATRY_CLINICS[day]
         schedule.append(
-            create_slot(
-                day,
-                clinic,
-                "OPD",
-                "09:00 AM",
-                "04:30 PM"
-            )
+            create_slot(day, activity, "OPD")
         )
 
-    return add_teaching_classes(schedule, 2)
+    add_classes(schedule)
+    assign_on_duty(schedule)
 
-# ==========================================
-# Minor Department Roster
-# Mostly OPD + Friday Other
-# 1 or 2 teaching classes
-# ==========================================
+    return schedule
+
+
 def generate_minor_roster():
-    schedule = [
-        create_slot(
-            "Monday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        ),
-        create_slot(
-            "Tuesday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        ),
-        create_slot(
-            "Wednesday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        ),
-        create_slot(
-            "Thursday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        ),
-        create_slot(
-            "Friday",
-            "Personal Agenda / Research / Meetings",
-            "Other",
-            "10:00 AM",
-            "01:00 PM"
-        ),
-        create_slot(
-            "Saturday",
-            "Outpatient Department",
-            "OPD",
-            "09:00 AM",
-            "04:30 PM"
-        )
-    ]
+    schedule = []
 
-    return add_teaching_classes(schedule, 2)
+    for day in DAYS:
+        if day == "Friday":
+            schedule.append(
+                create_slot(day, "Personal Agenda / Research", "Other")
+            )
+        else:
+            schedule.append(
+                create_slot(day, "Outpatient Department", "OPD")
+            )
 
-# ==========================================
-# On-Duty Doctor Assignment
-# One doctor every day
-# ==========================================
-def generate_on_duty_schedule():
-    days = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday"
-    ]
+    add_classes(schedule)
+    assign_on_duty(schedule)
 
-    on_duty = []
+    return schedule
 
-    for day in days:
-        on_duty.append({
-            "day": day,
-            "activity": "On Call Duty",
-            "details": "On Duty",
-            "startTime": "04:30 PM",
-            "endTime": "09:00 AM (Next Day)"
-        })
 
-    return on_duty
-
-# ==========================================
-# Main Function
-# ==========================================
 def generate_doctor_roster(doctor):
     department = doctor.get("department", "")
     department_type = doctor.get("departmentType", "Minor")
 
-    # Psychiatry-specific schedule
     if department == "Psychiatry":
         return generate_psychiatry_roster()
 
-    # Major departments
     if department_type == "Major":
         return generate_major_roster()
 
-    # Minor departments
     return generate_minor_roster()
