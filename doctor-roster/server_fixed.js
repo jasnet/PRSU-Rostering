@@ -2,8 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-const rosterRoutes = require("./routes/rosterRoutes");
-const doctorRoutes = require("./routes/doctorRoutes");
+const rosterRoutes = require("./routes/rosterRoutes_fixed");
 
 const app = express();
 
@@ -16,12 +15,11 @@ mongoose
     .catch((err) => console.error(err));
 
 app.get("/", (req, res) => {
-    res.send("Doctor Roster API Running");
+    res.send("Doctor Roster API Running (fixed)");
 });
 
 app.use("/api/rosters", rosterRoutes);
-app.use("/api/doctors", doctorRoutes);
 
 app.listen(5000, () => {
-    console.log("Server running on port 5000");
+    console.log("Server running on port 5000 (fixed)");
 });

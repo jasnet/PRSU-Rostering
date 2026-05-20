@@ -14,6 +14,7 @@ exports.generateRoster = async (req, res) => {
 
         const schedule = generateDoctorRoster(doctor);
 
+        // create and save roster document
         const roster = new Roster({
             doctorId: doctor.doctorId,
             doctorName: doctor.name,
@@ -22,21 +23,6 @@ exports.generateRoster = async (req, res) => {
         });
 
         await roster.save();
-
-        return res.status(200).json(roster);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
-};
-
-exports.getRoster = async (req, res) => {
-    try {
-        const { doctorId } = req.params;
-        const roster = await Roster.findOne({ doctorId });
-
-        if (!roster) {
-            return res.status(404).json({ message: "Roster not found" });
-        }
 
         return res.status(200).json(roster);
     } catch (error) {

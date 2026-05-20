@@ -1,0 +1,17 @@
+const departments = [
+  "General Medicine",
+  "General Surgery",
+  "Obstetrics & Gynaecology (OBG)",
+  "Pediatrics",
+  "Orthopedics",
+  "Dermatology (DVL)",
+  "Psychiatry",
+  "ENT (Ear, Nose, Throat)",
+  "Ophthalmology",
+  "Anaesthesiology",
+  "Radio Diagnosis (Radiology)",
+  "Dentistry",
+  "Emergency & Trauma Care"
+];
+
+export default departments;
