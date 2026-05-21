@@ -1,98 +1,276 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+
+import {
+    useNavigate
+} from 'react-router-dom';
 
 export default function Navbar() {
-    const [userLoggedIn, setUserLoggedIn] = useState(false);
-    const location = useLocation();
 
-    useEffect(() => {
-        if (sessionStorage.getItem('user')) {
-            setUserLoggedIn(true);
-        }
-    }, []);
+    const navigate = useNavigate();
 
-    const isActive = (path) => location.pathname === path ? 'active-link' : '';
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    // -----------------------------------
+    // LOGOUT
+    // -----------------------------------
+    const logout = () => {
+
+        sessionStorage.removeItem('user');
+
+        navigate('/login');
+
+    };
 
     return (
+
         <React.Fragment>
+
             <style>
+
                 {`
+
                     .navbar-custom {
+
                         height: 70px;
+
                         background-color: white !important;
+
                         position: fixed;
+
                         top: 0;
+
                         width: 100%;
+
                         z-index: 1030;
+
                         border-bottom: 1px solid #eaeaea;
+
                     }
+
                     .brand-navy {
+
                         color: #1e3050 !important;
+
                         font-weight: 800;
+
                         font-family: 'Inter', sans-serif;
+
                     }
-                    .nav-top-link {
-                        color: #6c757d;
-                        font-weight: 600;
-                        padding: 23px 15px;
-                        margin: 0 5px;
-                        border-bottom: 3px solid transparent;
-                        transition: all 0.2s;
-                        text-decoration: none;
+
+                    .profile-avatar {
+
+                        width: 42px;
+
+                        height: 42px;
+
+                        border-radius: 50%;
+
+                        overflow: hidden;
+
+                        cursor: pointer;
+
+                        border: 2px solid white;
+
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+                        transition: all 0.2s ease;
+
                     }
-                    .nav-top-link:hover {
-                        color: #1e3050;
+
+                    .profile-avatar:hover {
+
+                        transform: scale(1.05);
+
                     }
-                    .active-link {
-                        color: #1e3050 !important;
-                        border-bottom: 3px solid #f47b2c;
+
+                    .profile-dropdown {
+
+                        position: absolute;
+
+                        right: 0;
+
+                        top: 55px;
+
+                        background: white;
+
+                        border-radius: 12px;
+
+                        min-width: 160px;
+
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+
+                        border: 1px solid #f1f1f1;
+
+                        overflow: hidden;
+
+                        animation: fadeIn 0.2s ease;
+
                     }
-                    .btn-emergency {
-                        background-color: #f47b2c;
-                        color: white !important;
-                        border-radius: 8px;
-                        padding: 8px 24px;
-                        font-weight: 600;
-                        border: none;
+
+                    .dropdown-item-custom {
+
+                        padding: 12px 18px;
+
+                        cursor: pointer;
+
+                        font-weight: 500;
+
+                        transition: background 0.2s;
+
                     }
-                    .btn-emergency:hover {
-                        background-color: #e36a1b;
+
+                    .dropdown-item-custom:hover {
+
+                        background: #f8f9fc;
+
                     }
+
+                    @keyframes fadeIn {
+
+                        from {
+
+                            opacity: 0;
+
+                            transform: translateY(-8px);
+
+                        }
+
+                        to {
+
+                            opacity: 1;
+
+                            transform: translateY(0);
+
+                        }
+
+                    }
+
                 `}
+
             </style>
 
             <nav className="navbar navbar-expand-lg navbar-custom px-4 shadow-sm">
-                <a className="navbar-brand d-flex align-items-center" href="/">
-                    <img className='me-2 rounded-circle shadow-sm' src={require('../resources/new-logo.png')} alt='logo' style={{ width: "36px", height: "36px", objectFit: "cover" }} />
-                    <span className="brand-navy fs-4">PESU Hospital</span>
+
+                {/* ----------------------------------- */}
+                {/* LOGO */}
+                {/* ----------------------------------- */}
+
+                <a
+
+                    className="navbar-brand d-flex align-items-center"
+
+                    href="/"
+
+                >
+
+                    <img
+
+                        className='me-2 rounded-circle shadow-sm'
+
+                        src={require('../resources/new-logo.png')}
+
+                        alt='logo'
+
+                        style={{
+
+                            width: "36px",
+
+                            height: "36px",
+
+                            objectFit: "cover"
+
+                        }}
+
+                    />
+
+                    <span className="brand-navy fs-4">
+
+                        PESUIMSR
+
+                    </span>
+
                 </a>
 
-                <button
-                    className="navbar-toggler"
-                    type="button"
-                    data-mdb-toggle="collapse"
-                    data-mdb-target="#navbarNav"
-                    aria-controls="navbarNav"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <i className="fas fa-bars"></i>
-                </button>
+                {/* ----------------------------------- */}
+                {/* RIGHT SECTION */}
+                {/* ----------------------------------- */}
 
-                <div className="collapse navbar-collapse d-flex justify-content-between" id="navbarNav">
-                    <div className="d-flex align-items-center mx-auto">
-                        <Link to="/nurses" className={`nav-top-link ${isActive('/nurses')}`}>Nurses</Link>
-                        {/* <Link to="/doctors" className={`nav-top-link ${isActive('/doctors')}`}>Doctors</Link> */}
-                        <Link to="/speciality-clinics" className={`nav-top-link ${isActive('/speciality-clinics')}`}>Specialities</Link>
+                <div className="ms-auto position-relative">
+
+                    <div
+
+                        className="profile-avatar"
+
+                        onClick={() =>
+
+                            setShowDropdown(
+
+                                !showDropdown
+
+                            )
+
+                        }
+
+                    >
+
+                        <img
+
+                            src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(1).webp"
+
+                            alt="Avatar"
+
+                            className="w-100 h-100 object-fit-cover"
+
+                        />
+
                     </div>
 
-                    <div className="d-flex align-items-center gap-3">
-                        <button className="btn-emergency shadow-sm">Emergency</button>
-                        <div className="rounded-circle overflow-hidden shadow-sm border border-2 border-white" style={{ width: "40px", height: "40px", cursor: "pointer" }}>
-                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(1).webp" alt="Avatar" className="w-100 h-100 object-fit-cover" />
-                        </div>
-                    </div>
+                    {
+
+                        showDropdown && (
+
+                            <div className="profile-dropdown">
+
+                                <div
+
+                                    className="dropdown-item-custom"
+
+                                    onClick={() =>
+
+                                        navigate('/profile')
+
+                                    }
+
+                                >
+
+                                    Profile
+
+                                </div>
+
+                                <div
+
+                                    className="dropdown-item-custom text-danger"
+
+                                    onClick={logout}
+
+                                >
+
+                                    Logout
+
+                                </div>
+
+                            </div>
+
+                        )
+
+                    }
+
                 </div>
+
             </nav>
+
         </React.Fragment>
+
     );
+
 }

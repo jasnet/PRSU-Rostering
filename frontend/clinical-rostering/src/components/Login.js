@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../context/User/UserContext';
-
+import hospitalImage from "../resources/hospital.png"; 
 export default function Login() {
     const [formValues, setFormValues] = useState({ "e_id": "", "password": "" });
     const [error, setError] = useState("");
@@ -34,10 +34,39 @@ export default function Login() {
 
             const json = await response.json();
 
-            if (json && json['Employee'] && json['Employee'].length > 0) {
-                handleSetUserData(json['Employee'][0]);
-                sessionStorage.setItem('user', JSON.stringify(json['Employee'][0]));
-                navigate("/", { state: json });
+            if (json && json.employee) {
+                handleSetUserData(json.employee);
+                const role = json.employee.e_type;
+
+                if (role === "Admin") {
+
+                    navigate("/admin");
+
+                }
+
+                else if (role === "Nurse") {
+
+                    navigate("/nurse");
+
+                }
+
+                else if (role === "Doctor") {
+
+                    navigate("/doctor");
+
+                }
+
+                else if (role === "FrontDesk") {
+
+                    navigate("/frontdesk");
+
+                }
+
+                else {
+
+                    navigate("/");
+
+                }
                 window.location.reload();
             } else {
                 setError("Invalid Employee ID or Password. Please try again.");
@@ -93,16 +122,47 @@ export default function Login() {
                     box-shadow: 0 25px 80px rgba(0,0,0,0.4);
                     position: relative;
                     z-index: 1;
-                }
-                .login-left {
-                    flex: 1;
-                    background: linear-gradient(160deg, #f47b2c 0%, #e36518 100%);
-                    padding: 60px 50px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    position: relative;
-                    overflow: hidden;
+                    }
+                    .login-left {
+                        width: 50%;
+                        position: relative;
+                        overflow: hidden;
+                        background-size: cover;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: flex-start;
+                        padding: 60px;
+                    }
+                    
+                    .overlay {
+                        position: absolute;
+                        inset: 0;
+                        background: rgba(249, 115, 22, 0.35);
+                    }
+                    .login-brand {
+                        position: relative;
+                        z-index: 2;
+                    }
+                    
+                    .login-brand h1 {
+                        color: white;
+                        font-size: 72px;
+                        font-weight: 900;
+                        letter-spacing: 2px;
+                        margin: 0;
+                        // text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                    }
+
+                .login-image {
+                    width: 85%;
+                    height: 320px;
+                    object-fit: cover;
+                    border-radius: 20px;
+                    margin-top: 20px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
                 }
                 .login-left::before {
                     content: '';
@@ -285,38 +345,25 @@ export default function Login() {
 
             <div className="login-page">
                 <div className="login-container">
-                    <div className="login-left">
-                        <h1>PESU Rostering System</h1>
-                        <p>A scalable and brilliant approach to managing your entire clinical team schedule and patient operations.</p>
-                        <div className="login-features">
-                            <div className="login-feature-item">
-                                <div className="login-feature-icon">
-                                    <i className="fas fa-user-md"></i>
-                                </div>
-                                <span>Smart Staff Scheduling</span>
-                            </div>
-                            <div className="login-feature-item">
-                                <div className="login-feature-icon">
-                                    <i className="fas fa-clock"></i>
-                                </div>
-                                <span>24/7 Roster Management</span>
-                            </div>
-                            <div className="login-feature-item">
-                                <div className="login-feature-icon">
-                                    <i className="fas fa-chart-line"></i>
-                                </div>
-                                <span>Real-time Analytics</span>
-                            </div>
-                            <div className="login-feature-item">
-                                <div className="login-feature-icon">
-                                    <i className="fas fa-shield-alt"></i>
-                                </div>
-                                <span>Secure Employee Portal</span>
-                            </div>
-                        </div>
+                    <div
+                        className="login-left"
+                        style={{
+                            backgroundImage: `url(${hospitalImage})`
+                        }}
+                    >
+
+                        <div className="overlay"></div>
+
+                        {/* <div className="login-brand">
+
+                            <h1>PESUIMSR</h1>
+
+                        </div> */}
+
                     </div>
 
                     <div className="login-right">
+                        <h1>PESUIMSR</h1>
                         <h2>Welcome Back</h2>
                         <p className="subtitle">Authorized Personnel Only</p>
 

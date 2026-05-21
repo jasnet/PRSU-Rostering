@@ -2,6 +2,9 @@ from nurse_roster.services.leave_service import (
     get_nurse_leaves
 )
 
+from datetime import datetime, timedelta
+
+
 def generate_monthly_roster(
     nurses,
     total_days
@@ -10,6 +13,7 @@ def generate_monthly_roster(
     roster = []
 
     weekly_shifts = ["M", "E", "N"]
+
 
     for index, nurse in enumerate(nurses):
 
@@ -25,21 +29,40 @@ def generate_monthly_roster(
             leave["date"]
 
             for leave in leaves
+
         ]
+
 
         # --------------------------------
         # WEEKLY SHIFT ROTATION
         # --------------------------------
         for day in range(total_days):
 
-            current_date = day + 1
+            base_date = datetime.now()
+
+            current_date = base_date + timedelta(
+
+                days=day
+
+            )
+
+            date_number = current_date.day
+
+            weekday = current_date.strftime(
+                "%A"
+            )
+
+            formatted_date = current_date.strftime(
+                "%d-%m-%Y"
+            )
 
             week_number = day // 7
+
 
             # --------------------------------
             # LEAVE
             # --------------------------------
-            if current_date in leave_dates:
+            if date_number in leave_dates:
 
                 roster.append({
 
@@ -47,7 +70,11 @@ def generate_monthly_roster(
 
                     "department": nurse["department"],
 
-                    "date": current_date,
+                    "date": date_number,
+
+                    "fullDate": formatted_date,
+
+                    "weekday": weekday,
 
                     "shift": "L",
 
@@ -57,12 +84,13 @@ def generate_monthly_roster(
 
                 continue
 
+
             # --------------------------------
             # MINOR DEPARTMENTS
             # --------------------------------
             if nurse["shift_pattern"] == "general":
 
-                # Weekly off on Sunday
+                # Weekly Off
                 if day % 7 == 6:
 
                     roster.append({
@@ -71,7 +99,11 @@ def generate_monthly_roster(
 
                         "department": nurse["department"],
 
-                        "date": current_date,
+                        "date": date_number,
+
+                        "fullDate": formatted_date,
+
+                        "weekday": weekday,
 
                         "shift": "WO",
 
@@ -81,13 +113,18 @@ def generate_monthly_roster(
 
                     continue
 
+
                 roster.append({
 
                     "nurse_id": nurse["nurse_id"],
 
                     "department": nurse["department"],
 
-                    "date": current_date,
+                    "date": date_number,
+
+                    "fullDate": formatted_date,
+
+                    "weekday": weekday,
 
                     "shift": "G",
 
@@ -97,12 +134,14 @@ def generate_monthly_roster(
 
                 continue
 
+
             # --------------------------------
             # ASSIGN WEEKLY SHIFT
             # --------------------------------
             weekly_shift = weekly_shifts[
                 (week_number + index) % 3
             ]
+
 
             # --------------------------------
             # NIGHT OFF
@@ -115,7 +154,11 @@ def generate_monthly_roster(
 
                     "department": nurse["department"],
 
-                    "date": current_date,
+                    "date": date_number,
+
+                    "fullDate": formatted_date,
+
+                    "weekday": weekday,
 
                     "shift": "NO",
 
@@ -124,6 +167,7 @@ def generate_monthly_roster(
                 })
 
                 continue
+
 
             # --------------------------------
             # WEEK OFF
@@ -136,7 +180,11 @@ def generate_monthly_roster(
 
                     "department": nurse["department"],
 
-                    "date": current_date,
+                    "date": date_number,
+
+                    "fullDate": formatted_date,
+
+                    "weekday": weekday,
 
                     "shift": "WO",
 
@@ -145,6 +193,7 @@ def generate_monthly_roster(
                 })
 
                 continue
+
 
             # --------------------------------
             # REGULAR SHIFT
@@ -155,7 +204,11 @@ def generate_monthly_roster(
 
                 "department": nurse["department"],
 
-                "date": current_date,
+                "date": date_number,
+
+                "fullDate": formatted_date,
+
+                "weekday": weekday,
 
                 "shift": weekly_shift,
 

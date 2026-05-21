@@ -1,90 +1,258 @@
 from pymongo import MongoClient
 
-def seed_db():
-    print("Connecting to MongoDB...")
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client["clinical_rostering"]
+# -----------------------------------
+# CONNECT
+# -----------------------------------
+client = MongoClient(
+    "mongodb://localhost:27017/"
+)
 
-    # 1. Seed Employees
-    print("Seeding employees...")
-    employees = [
-        {
-            "e_id": "Emp_01", "e_name": "Dr. John Smith", "e_type": "Doctor", 
-            "primary_specialization": "Cardiology", "secondary_specialization": "Internal Medicine", 
-            "location": "Cardiology", "password": "password123"
-        },
-        {
-            "e_id": "Emp_02", "e_name": "Sarah Lee", "e_type": "Nurse", 
-            "primary_specialization": "Pediatrics", "secondary_specialization": "Neonatal Care", 
-            "location": "Pediatrics", "password": "password456"
-        },
-        {
-            "e_id": "Emp_03", "e_name": "James Kim", "e_type": "Radiology Technician", 
-            "primary_specialization": "MRI Scanning", "secondary_specialization": "CT Scanning", 
-            "location": "Radiology", "password": "password789"
-        },
-        {
-            "e_id": "Emp_04", "e_name": "Lisa Chen", "e_type": "Pharmacist", 
-            "primary_specialization": "Oncology", "secondary_specialization": "Geriatrics", 
-            "location": "Oncology", "password": "passwordabc"
-        },
-        {
-            "e_id": "Emp_05", "e_name": "Michael Davis", "e_type": "Admin Assistant", 
-            "primary_specialization": "Medical Billing and Coding", "secondary_specialization": "Medical Transcription", 
-            "location": "Medical Records", "password": "passworddef"
-        }
-    ]
+db = client["clinical_rostering"]
 
-    # Clear existing to avoid duplicates if run multiple times
-    db.employees.delete_many({})
-    db.employees.insert_many(employees)
-    print(f"Inserted {len(employees)} employees.")
+print("Connected to MongoDB")
 
-    # 2. Seed Shifts
-    print("Seeding shifts...")
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    times = [('08:00:00', '16:00:00'), ('16:00:00', '00:00:00'), ('00:00:00', '08:00:00')]
-    locations = ["ICU", "Emergency", "Cardiology", "Neurology"]
-    
-    shifts = []
-    sft_count = 1
-    for day in days:
-        for time in times:
-            for loc in locations:
-                sft_id = f"SFT{sft_count:03d}"
-                shifts.append({
-                    "shift_id": sft_id,
-                    "day": day,
-                    "time_slot_start": time[0],
-                    "time_slot_end": time[1],
-                    "location": loc
-                })
-                sft_count += 1
-    
-    db.shifts.delete_many({})
-    db.shifts.insert_many(shifts)
-    print(f"Inserted {len(shifts)} shifts.")
 
-    # 3. Seed Schedule
-    print("Seeding schedules...")
-    schedules = []
-    sch_count = 1
-    for emp in employees:
-        for i in range(1, 6): # Assign to 5 random-ish shifts
-            sft_id = f"SFT{i:03d}" 
-            sch_id = f"SCH{sch_count:03d}"
-            schedules.append({
-                "schedule_id": sch_id,
-                "shift_id": sft_id,
-                "e_id": emp["e_id"]
-            })
-            sch_count += 1
+# -----------------------------------
+# CLEAR CONFIG COLLECTIONS
+# -----------------------------------
+collections = [
 
-    db.schedule.delete_many({})
-    db.schedule.insert_many(schedules)
-    print(f"Inserted {len(schedules)} schedules.")
+    "shifts",
 
-    print("Database seeded successfully!")
+    "shift_config",
 
-if __name__ == "__main__":
-    seed_db()
+    "department_config"
+
+]
+
+for collection in collections:
+
+    db[collection].delete_many({})
+
+print("Old config collections cleared")
+
+
+# -----------------------------------
+# SHIFT CONFIG
+# -----------------------------------
+shift_config = [
+
+    {
+
+        "shift": "M",
+
+        "name": "Morning",
+
+        "start": "08:00",
+
+        "end": "14:00"
+
+    },
+
+    {
+
+        "shift": "E",
+
+        "name": "Evening",
+
+        "start": "14:00",
+
+        "end": "20:00"
+
+    },
+
+    {
+
+        "shift": "N",
+
+        "name": "Night",
+
+        "start": "20:00",
+
+        "end": "08:00"
+
+    },
+
+    {
+
+        "shift": "G",
+
+        "name": "General",
+
+        "start": "09:00",
+
+        "end": "16:30"
+
+    }
+
+]
+
+db.shift_config.insert_many(
+    shift_config
+)
+
+print("Shift configs added")
+
+
+# -----------------------------------
+# DEPARTMENT CONFIG
+# -----------------------------------
+department_config = [
+
+    {
+        "department": "General Medicine",
+        "type": "Major"
+    },
+
+    {
+        "department": "General Surgery",
+        "type": "Major"
+    },
+
+    {
+        "department": "OBG",
+        "type": "Major"
+    },
+
+    {
+        "department": "Pediatrics",
+        "type": "Major"
+    },
+
+    {
+        "department": "Orthopedics",
+        "type": "Major"
+    },
+
+    {
+        "department": "Emergency & Trauma Care",
+        "type": "Major"
+    },
+
+    {
+        "department": "Psychiatry",
+        "type": "Minor"
+    },
+
+    {
+        "department": "Dermatology",
+        "type": "Minor"
+    },
+
+    {
+        "department": "ENT",
+        "type": "Minor"
+    },
+
+    {
+        "department": "Ophthalmology",
+        "type": "Minor"
+    },
+
+    {
+        "department": "Dentistry",
+        "type": "Minor"
+    },
+
+    {
+        "department": "Radiology",
+        "type": "Minor"
+    }
+
+]
+
+
+
+db.department_config.insert_many(
+    department_config
+)
+
+print("Department configs added")
+
+staffing_config = [
+
+    {
+        "department": "ICU",
+        "staffing_type": "critical",
+        "ratio": 1
+    },
+
+    {
+        "department": "OT",
+        "staffing_type": "critical",
+        "ratio": 1
+    },
+
+    {
+        "department": "Ward",
+        "staffing_type": "ward",
+        "normal_ratio": 8,
+        "semi_critical_ratio": 5
+    },
+
+    {
+        "department": "OPD",
+        "staffing_type": "fixed",
+        "fixed_nurses": 2
+    }
+
+]
+
+db.staffing_config.delete_many({})
+
+db.staffing_config.insert_many(
+    staffing_config
+)
+
+# -----------------------------------
+# SHIFTS
+# -----------------------------------
+days = [
+
+    "Monday",
+
+    "Tuesday",
+
+    "Wednesday",
+
+    "Thursday",
+
+    "Friday",
+
+    "Saturday",
+
+    "Sunday"
+
+]
+
+shifts = []
+
+shift_count = 1
+
+for day in days:
+
+    for shift in shift_config:
+
+        shifts.append({
+
+            "shift_id": f"SFT{str(shift_count).zfill(3)}",
+
+            "day": day,
+
+            "shift": shift["shift"],
+
+            "start": shift["start"],
+
+            "end": shift["end"]
+
+        })
+
+        shift_count += 1
+
+db.shifts.insert_many(
+    shifts
+)
+
+print("Shifts added")
+
+print("MongoDB base seeding completed")

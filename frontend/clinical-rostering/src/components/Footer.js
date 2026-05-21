@@ -8,9 +8,9 @@ export default function Footer() {
                     
                     {/* Left Side Branding */}
                     <div className="col-md-6 text-center text-md-start mb-4 mb-md-0">
-                        <h4 className="fw-bold text-white mb-3">PESU Hospital</h4>
+                        <h4 className="fw-bold text-white mb-3">PESUIMSR</h4>
                         <p className="small mb-0" style={{ color: '#8a99b5', letterSpacing: '0.5px' }}>
-                            © 2024 PESU HOSPITAL DIGITAL EXPERIENCE. CLINICAL CURATOR SYSTEM.
+                            © 2024 PESUIMSR DIGITAL EXPERIENCE. CLINICAL CURATOR SYSTEM.
                         </p>
                     </div>
 

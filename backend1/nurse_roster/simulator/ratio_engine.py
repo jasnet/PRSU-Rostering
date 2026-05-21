@@ -1,19 +1,93 @@
-from math import ceil
+import math
 
+
+# -----------------------------------
+# STAFFING ENGINE
+# -----------------------------------
 def calculate_required_nurses(
+
+    department,
+
     patient_count,
+
     severity="normal"
+
 ):
 
-    # ICU ratio
-    if severity == "icu":
+    # -----------------------------------
+    # ICU / OT
+    # -----------------------------------
+    if department in [
 
-        return patient_count
+        "ICU",
 
-    # Semi critical ratio
-    if severity == "semi_critical":
+        "OT",
 
-        return ceil(patient_count / 5)
+        "Emergency & Trauma Care"
 
-    # Normal ward ratio
-    return ceil(patient_count / 8)
+    ]:
+
+        required = patient_count
+
+
+    # -----------------------------------
+    # MAJOR WARDS
+    # -----------------------------------
+    elif department in [
+
+        "General Medicine",
+
+        "General Surgery",
+
+        "Pediatrics",
+
+        "OBG",
+
+        "Orthopedics"
+
+    ]:
+
+        if severity == "semi_critical":
+
+            required = math.ceil(
+                patient_count / 5
+            )
+
+        else:
+
+            required = math.ceil(
+                patient_count / 8
+            )
+
+
+    # -----------------------------------
+    # MINOR / OPD
+    # -----------------------------------
+    elif department in [
+
+        "Psychiatry",
+
+        "Dermatology",
+
+        "ENT",
+
+        "Ophthalmology",
+
+        "Dentistry"
+
+    ]:
+
+        required = 2
+
+
+    # -----------------------------------
+    # DEFAULT
+    # -----------------------------------
+    else:
+
+        required = math.ceil(
+            patient_count / 8
+        )
+
+
+    return required

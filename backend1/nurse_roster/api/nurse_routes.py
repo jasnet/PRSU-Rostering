@@ -122,13 +122,119 @@ def get_roster(department: str):
 # -----------------------------------
 @router.get("/staffing")
 def staffing(
+
+    department: str,
+
     patients: int,
+
     nurses: int,
-    severity: str
+
+    severity: str = "normal"
+
 ):
 
     return get_staffing_status(
+
+        department,
+
         patients,
+
         nurses,
+
         severity
+
     )
+
+# -----------------------------------
+# GET MY ROSTER
+# -----------------------------------
+@router.get(
+
+    "/my-roster/{nurse_id}"
+
+)
+def get_my_roster(
+
+    nurse_id: str
+
+):
+
+    roster = list(
+
+        db.nurse_rosters.find(
+
+            {
+
+                "nurse_id": nurse_id
+
+            },
+
+            {
+
+                "_id": 0
+
+            }
+
+        )
+
+    )
+
+    return roster
+
+# -----------------------------------
+# GENERATE ALL NURSE ROSTERS
+# -----------------------------------
+@router.post("/generate-all")
+def generate_all_nurse_rosters():
+
+    departments = db.nurses.distinct(
+
+        "department"
+
+    )
+
+    db.nurse_rosters.delete_many({})
+
+    for department in departments:
+
+        nurses = list(
+
+            db.nurses.find(
+
+                {
+
+                    "department": department
+
+                },
+
+                {
+
+                    "_id": 0
+
+                }
+
+            )
+
+        )
+
+        roster = generate_monthly_roster(
+
+            nurses,
+
+            30
+
+        )
+
+        if roster:
+
+            db.nurse_rosters.insert_many(
+
+                roster
+
+            )
+
+    return {
+
+        "message": "All nurse rosters generated"
+
+    }
