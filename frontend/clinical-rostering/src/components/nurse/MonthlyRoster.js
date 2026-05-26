@@ -10,6 +10,8 @@ import {
 
     generateRoster,
 
+    generateAllRosters,
+
     fetchRoster
 
 } from '../../api/dashboardApi';
@@ -30,28 +32,37 @@ export default function MonthlyRoster() {
 
     );
 
-    const [days, setDays] = useState(30);
 
     // -----------------------------------
     // DEPARTMENTS
     // -----------------------------------
     const departments = [
 
-        "General Medicine",
+    "General Medicine",
 
-        "General Surgery",
+    "General Surgery",
 
-        "Pediatrics",
+    "Pediatrics",
 
-        "OBG",
+    "OBG",
 
-        "Orthopedics",
+    "Orthopedics",
 
-        "Psychiatry",
+    "Psychiatry",
 
-        "Dermatology"
+    "Dermatology",
 
-    ];
+    "Dentistry",
+
+    "ENT",
+
+    "Radiology",
+
+    "Emergency & Trauma Care",
+
+    "Ophthalmology"
+
+];
 
 
     // -----------------------------------
@@ -61,7 +72,7 @@ export default function MonthlyRoster() {
 
         loadRoster();
 
-    }, []);
+    }, [department]);
 
 
     // -----------------------------------
@@ -73,21 +84,47 @@ export default function MonthlyRoster() {
 
             setLoading(true);
 
-            const data = await fetchRoster(
+            console.log(
+
+                "Fetching:",
 
                 department
 
             );
 
-            setRoster(data);
+            const response = await fetchRoster(
+
+                department
+
+            );
+
+            console.log(
+
+                "Roster response:",
+
+                response
+
+            );
+
+            setRoster(
+
+                response || []
+
+            );
 
             setLoading(false);
 
         }
 
-        catch (error) {
+        catch(error){
 
-            console.error(error);
+            console.error(
+
+                "FETCH ERROR:",
+
+                error
+
+            );
 
             setLoading(false);
 
@@ -97,7 +134,52 @@ export default function MonthlyRoster() {
 
 
     // -----------------------------------
-    // GENERATE
+    // GENERATE ALL DEPARTMENTS
+    // -----------------------------------
+    const handleGenerateAll = async () => {
+
+        try {
+
+            setLoading(true);
+
+            console.log(
+
+                "Generating ALL departments..."
+
+            );
+
+            await generateAllRosters();
+
+            alert(
+
+                "All departments generated!"
+
+            );
+
+            await loadRoster();
+
+            setLoading(false);
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+            alert(
+
+                "Generation failed"
+
+            );
+
+            setLoading(false);
+
+        }
+
+    };
+
+    // -----------------------------------
+    // SHOW SCHEDULE
     // -----------------------------------
     const handleGenerate = async () => {
 
@@ -105,15 +187,9 @@ export default function MonthlyRoster() {
 
             setLoading(true);
 
-            await generateRoster(
-
-                department,
-
-                days
-
-            );
-
             await loadRoster();
+
+            setLoading(false);
 
         }
 
@@ -126,7 +202,6 @@ export default function MonthlyRoster() {
         }
 
     };
-
 
     // -----------------------------------
     // GROUP BY NURSE
@@ -375,7 +450,29 @@ export default function MonthlyRoster() {
 
                         {/* DEPARTMENT */}
 
-                        <div className="col-md-4">
+                        <div className="row mb-4">
+
+                        {/* Generate All */}
+
+                        <div className="col-md-12 mb-3">
+
+                            <button
+
+                                className="btn btn-success"
+
+                                onClick={handleGenerateAll}
+
+                            >
+
+                                Generate Roster
+
+                            </button>
+
+                        </div>
+
+                        {/* Department */}
+
+                        <div className="col-md-8">
 
                             <label className="form-label">
 
@@ -389,7 +486,7 @@ export default function MonthlyRoster() {
 
                                 value={department}
 
-                                onChange={(e) =>
+                                onChange={(e)=>
 
                                     setDepartment(
 
@@ -405,11 +502,13 @@ export default function MonthlyRoster() {
 
                                     departments.map(
 
-                                        (dept, index) => (
+                                        dept => (
 
                                             <option
 
-                                                key={index}
+                                                key={dept}
+
+                                                value={dept}
 
                                             >
 
@@ -427,79 +526,25 @@ export default function MonthlyRoster() {
 
                         </div>
 
+                        {/* Show Schedule */}
 
-                        {/* DAYS */}
-
-                        <div className="col-md-2">
-
-                            <label className="form-label">
-
-                                Days
-
-                            </label>
-
-                            <input
-
-                                type="number"
-
-                                className="form-control"
-
-                                value={days}
-
-                                onChange={(e) =>
-
-                                    setDays(
-
-                                        e.target.value
-
-                                    )
-
-                                }
-
-                            />
-
-                        </div>
-
-
-                        {/* BUTTON */}
-
-                        <div className="col-md-3">
+                        <div className="col-md-4 d-flex align-items-end">
 
                             <button
 
                                 className="btn btn-primary w-100"
 
-                                style={{
-
-                                    height: '45px',
-
-                                    borderRadius: '12px',
-
-                                    fontWeight: '600'
-
-                                }}
-
                                 onClick={handleGenerate}
 
                             >
 
-                                {
-
-                                    loading
-
-                                        ?
-
-                                        "Generating..."
-
-                                        :
-
-                                        "Generate Roster"
-
-                                }
+                                Show Schedule
 
                             </button>
 
                         </div>
+
+                    </div>
 
                     </div>
 
@@ -700,7 +745,7 @@ export default function MonthlyRoster() {
 
                                             {
 
-                                                length: days
+                                                length: 30
 
                                             },
 
@@ -849,7 +894,7 @@ export default function MonthlyRoster() {
 
                                                         {
 
-                                                            length: days
+                                                            length: 30
 
                                                         },
 

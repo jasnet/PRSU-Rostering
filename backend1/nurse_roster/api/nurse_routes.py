@@ -90,6 +90,22 @@ def generate_roster(data: dict):
 
     if roster:
 
+        db.nurse_rosters.delete_many(
+
+            {
+
+                "department": department
+
+            }
+
+        )
+
+        db.nurse_rosters.insert_many(
+
+            roster
+
+        )
+        db.nurse_rosters.delete_many({})
         db.nurse_rosters.insert_many(roster)
 
     return {
@@ -193,7 +209,10 @@ def generate_all_nurse_rosters():
 
     )
 
+    # clear once ONLY
     db.nurse_rosters.delete_many({})
+
+    all_rosters = []
 
     for department in departments:
 
@@ -217,6 +236,10 @@ def generate_all_nurse_rosters():
 
         )
 
+        if not nurses:
+
+            continue
+
         roster = generate_monthly_roster(
 
             nurses,
@@ -225,16 +248,26 @@ def generate_all_nurse_rosters():
 
         )
 
-        if roster:
+        all_rosters.extend(
 
-            db.nurse_rosters.insert_many(
+            roster
 
-                roster
+        )
 
-            )
+    if all_rosters:
+
+        db.nurse_rosters.insert_many(
+
+            all_rosters
+
+        )
 
     return {
 
-        "message": "All nurse rosters generated"
+        "message": "All nurse rosters generated",
+
+        "entries": len(all_rosters)
 
     }
+
+

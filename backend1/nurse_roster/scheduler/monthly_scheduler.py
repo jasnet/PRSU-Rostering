@@ -17,6 +17,7 @@ def generate_monthly_roster(
 
     for index, nurse in enumerate(nurses):
 
+        weekly_off_day = index % 7
         # --------------------------------
         # FETCH LEAVES
         # --------------------------------
@@ -91,7 +92,7 @@ def generate_monthly_roster(
             if nurse["shift_pattern"] == "general":
 
                 # Weekly Off
-                if day % 7 == 6:
+                if day % 7 == weekly_off_day:
 
                     roster.append({
 
@@ -146,7 +147,7 @@ def generate_monthly_roster(
             # --------------------------------
             # NIGHT OFF
             # --------------------------------
-            if weekly_shift == "N" and day % 7 == 6:
+            if weekly_shift == "N" and day % 7 == weekly_off_day:
 
                 roster.append({
 
@@ -172,7 +173,7 @@ def generate_monthly_roster(
             # --------------------------------
             # WEEK OFF
             # --------------------------------
-            if weekly_shift != "N" and day % 7 == 6:
+            if weekly_shift != "N" and day % 7 == weekly_off_day:
 
                 roster.append({
 

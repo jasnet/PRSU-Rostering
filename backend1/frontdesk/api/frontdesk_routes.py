@@ -6,6 +6,14 @@ from datetime import datetime
 
 import random
 
+from frontdesk.services.live_patient_simulator import (
+    get_live_patients
+)
+
+from nurse_roster.simulator.ratio_engine import (
+    calculate_required_nurses
+)
+
 
 router = APIRouter(
 
@@ -179,10 +187,9 @@ def get_dashboard_data():
             }
 
         )
-
+        
     )
-
-
+    
     for nurse in today_rosters:
 
         department = nurse.get(
@@ -224,6 +231,7 @@ def get_dashboard_data():
     # CURRENT SHIFT
     # -----------------------------------
     current_hour = datetime.now().hour
+    
 
 
     if 8 <= current_hour < 14:
@@ -243,7 +251,7 @@ def get_dashboard_data():
     # STAFFING OVERVIEW
     # -----------------------------------
     patient_ratio = []
-
+    live_data = get_live_patients()
 
     for department, counts in nurse_counts.items():
 
@@ -270,22 +278,17 @@ def get_dashboard_data():
             )
 
 
-        # Estimated patients
-        estimated_patients = random.randint(
-
-            15,
-
-            40
-
-        )
+        patients = live_data[
+            department
+        ]["patients"]
 
 
         # Required nurses
-        required_nurses = max(
+        required_nurses = calculate_required_nurses(
 
-            1,
+            department,
 
-            estimated_patients // 8
+            patients
 
         )
 
@@ -306,7 +309,7 @@ def get_dashboard_data():
 
             "department": department,
 
-            "patients": estimated_patients,
+            "patients": patients,
 
             "nurses": active_nurses,
 

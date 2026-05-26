@@ -348,3 +348,30 @@ export const fetchFrontdeskDashboard = async () => {
     return response.data;
 
 };
+
+export const getFrontdeskDashboard = async () => {
+
+    const response = await fetch(
+
+        'http://localhost:8000/api/frontdesk/dashboard'
+
+    );
+
+    return await response.json();
+
+};
+
+// -----------------------------------
+// GENERATE ALL ROSTERS
+// -----------------------------------
+export const generateAllRosters = async () => {
+
+    const response = await axios.post(
+
+        '/api/nurse-roster/generate-all'
+
+    );
+
+    return response.data;
+
+};

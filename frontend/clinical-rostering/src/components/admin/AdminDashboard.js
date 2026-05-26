@@ -14,9 +14,12 @@ import {
 
     getDepartmentStaffing,
 
-    getDoctorActivity
+    getDoctorActivity,
+
+    getFrontdeskDashboard
 
 } from '../../api/dashboardApi';
+
 
 export default function AdminDashboard() {
 
@@ -30,6 +33,13 @@ export default function AdminDashboard() {
 
     const [doctorActivity, setDoctorActivity] = useState([]);
 
+    const [doctorSearch, setDoctorSearch] = useState("");
+
+    const [doctorResult, setDoctorResult] = useState(null);
+
+    const [consultants, setConsultants] = useState([]);
+
+    const [doctors, setDoctors] = useState([]);
 
     // -----------------------------------
     // LOAD DASHBOARD
@@ -50,34 +60,37 @@ export default function AdminDashboard() {
 
             const nurses = await getNurses();
 
-            const doctors = await getDoctors();
+            const doctorsData = await getDoctors();
 
             setNurseCount(
                 nurses.length
             );
 
-            setDoctorCount(
-                doctors.length
+            setDoctors(
+                doctorsData
             );
 
+            setDoctorCount(
+                doctorsData.length
+            );
+
+            const frontdeskData = await getFrontdeskDashboard();
+
+            setConsultants(
+
+                frontdeskData.consultants
+
+            );
 
             // -----------------------------------
-            // STAFFING DATA
+            // FRONTDESK STAFFING DATA
             // -----------------------------------
 
-            const staffingOverview = await getDepartmentStaffing();
+            const dashboardData = await getFrontdeskDashboard();
 
             setStaffingData(
 
-                staffingOverview
-
-            );
-
-            const doctorActivityData = await getDoctorActivity();
-
-            setDoctorActivity(
-
-                doctorActivityData
+                dashboardData.patientRatio
 
             );
 
@@ -92,7 +105,30 @@ export default function AdminDashboard() {
         }
 
     };
+    const handleDoctorSearch = () => {
 
+        const doctor = consultants.find(
+
+            (d)=>
+
+                d.doctor
+                    ?.toLowerCase()
+                    .includes(
+
+                        doctorSearch
+                        .toLowerCase()
+
+                    )
+
+        );
+
+        setDoctorResult(
+
+            doctor || null
+
+        );
+
+    };
 
     // -----------------------------------
     // LOADING
@@ -447,7 +483,7 @@ export default function AdminDashboard() {
 
                                                             {dept.department} requires {
 
-                                                                dept.shortage
+                                                                dept.required - dept.nurses
 
                                                             } more nurses.
 
@@ -556,13 +592,13 @@ export default function AdminDashboard() {
 
                                                         <td>
 
-                                                            {dept.available_nurses}
+                                                            {dept.nurses}
 
                                                         </td>
 
                                                         <td>
 
-                                                            {dept.required_nurses}
+                                                            {dept.required}
 
                                                         </td>
 
@@ -611,133 +647,210 @@ export default function AdminDashboard() {
                 </div>
 
             </div>
+            
             {/* ----------------------------------- */}
-            {/* DOCTOR ACTIVITY */}
+            {/* DOCTOR SEARCH */}
             {/* ----------------------------------- */}
 
-            <div className="mt-5">
+            <div className="card border-0 shadow-sm mt-5">
 
-                <div className="card border-0 shadow-sm">
+                <div className="card-body p-4">
 
-                    <div className="card-body p-4">
+                    <h3
 
-                        <div className="mb-4">
+                        style={{
 
-                            <h3
+                            color:'#1e3050',
+
+                            fontWeight:'700'
+
+                        }}
+
+                    >
+
+                        Doctor Search
+
+                    </h3>
+
+                    <p className="text-muted">
+
+                        Search doctor by name
+
+                    </p>
+
+                    <div className="d-flex gap-3 mb-4">
+
+                        <input
+
+                            type="text"
+
+                            className="form-control"
+
+                            placeholder="Enter doctor name"
+
+                            value={doctorSearch}
+
+                            onChange={(e)=>
+
+                                setDoctorSearch(
+
+                                    e.target.value
+
+                                )
+
+                            }
+
+                            style={{
+
+                                height:'55px',
+
+                                borderRadius:'12px'
+
+                            }}
+
+                        />
+
+                        <button
+
+                            className="btn btn-primary"
+
+                            onClick={
+
+                                handleDoctorSearch
+
+                            }
+
+                        >
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                    {
+
+                        doctorResult && (
+
+                            <div
+
+                                className="border rounded p-4"
 
                                 style={{
 
-                                    color: '#1e3050',
-
-                                    fontWeight: '700'
+                                    borderRadius:'16px'
 
                                 }}
 
                             >
 
-                                Doctor Activity Today
+                                <div className="row">
 
-                            </h3>
+                                    <div className="col-md-4">
 
-                            <p className="text-muted mb-0">
+                                        <h5>
 
-                                OPD, OT and OnDuty monitoring
+                                            {
 
-                            </p>
+                                                doctorResult.doctor
 
-                        </div>
+                                            }
 
-                        <div className="table-responsive">
+                                        </h5>
 
-                            <table className="table align-middle">
+                                    </div>
 
-                                <thead>
+                                    <div className="col-md-3">
 
-                                    <tr>
+                                        <strong>
 
-                                        <th>Department</th>
+                                            Department
 
-                                        <th>Doctor</th>
+                                        </strong>
 
-                                        <th>Duty</th>
+                                        <p>
 
-                                    </tr>
+                                            {
 
-                                </thead>
+                                                doctorResult.department
 
-                                <tbody>
+                                            }
 
-                                    {
+                                        </p>
 
-                                        doctorActivity.map(
+                                    </div>
 
-                                            (doc, index) => (
+                                    <div className="col-md-2">
 
-                                                <tr key={index}>
+                                        <strong>
 
-                                                    <td>
+                                            Today's Duty
 
-                                                        <strong>
+                                        </strong>
 
-                                                            {doc.department}
+                                        <p>
 
-                                                        </strong>
+                                            {
 
-                                                    </td>
+                                                doctorResult.duty
 
-                                                    <td>
+                                            }
 
-                                                        {doc.doctor}
+                                        </p>
 
-                                                    </td>
+                                    </div>
 
-                                                    <td>
+                                    <div className="col-md-2">
 
-                                                        <span
+                                        <strong>
 
-                                                            className={`badge ${doc.duty === "OT"
+                                            Time
 
-                                                                    ?
+                                        </strong>
 
-                                                                    "bg-danger"
+                                        <p>
 
-                                                                    :
+                                            {
 
-                                                                    doc.duty === "OnDuty"
+                                                doctorResult.time
 
-                                                                        ?
+                                            }
 
-                                                                        "bg-warning text-dark"
+                                        </p>
 
-                                                                        :
+                                    </div>
 
-                                                                        "bg-primary"
+                                    <div className="col-md-1">
 
-                                                                }`}
+                                        <strong>
 
-                                                        >
+                                            Class
 
-                                                            {doc.duty}
+                                        </strong>
 
-                                                        </span>
+                                        <p>
 
-                                                    </td>
+                                            {
 
-                                                </tr>
+                                                doctorResult.class
 
-                                            )
+                                                ||
 
-                                        )
+                                                "-"
 
-                                    }
+                                            }
 
-                                </tbody>
+                                        </p>
 
-                            </table>
+                                    </div>
 
-                        </div>
+                                </div>
 
-                    </div>
+                            </div>
+
+                        )
+
+                    }
 
                 </div>
 
